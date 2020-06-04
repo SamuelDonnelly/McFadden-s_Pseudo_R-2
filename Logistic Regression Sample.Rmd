@@ -1,0 +1,76 @@
+---
+title: "Logistic Regression Sample"
+author: "Sam Donnelly"
+date: "6/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE,}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, options(scipen = 999))
+```
+
+```{r}
+library(tidyr)
+library(ggplot2)
+library(rms)
+```
+
+## Create Data
+```{r}
+x <- c(0.22, -0.55, 2.06, -2.55, -2.65, 2.99, 3.55, -1.33, -2.55, 3.22, 2.88, 3.99, 2.11, 3.11, 2.33, 3.00)
+y <- c(1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1)
+data <- tibble(x, y)
+ID <- c(1:nrow(data))
+data <- tibble(ID, x, y)
+```
+
+## Inspect Data
+```{r}
+head(data)
+```
+
+## Create Model
+```{r}
+model <- glm(y ~ x, family = "binomial")
+model
+```
+
+## Create Null Model
+```{r}
+null_model <- glm(y ~ 1, family = "binomial") # Can be used to find McFadden's Pseudo R^2, but I end up using the lrm function in the rms package.
+```
+
+## Calculating R Squared using McFadden's Pseudo R^2
+ *R^2 in logistic regression uses the maximum likelihood of the fitted model over the maximum likelihood of the intercept only model. This value is then subtracted from 1. For example, McFadden's Pseudo R^2 = 1 - (logLik(fitted model)/logLik(intercept model))*
+
+## Inspect Model
+```{r}
+summary(model) #Look at residuals next time
+```
+
+## Graph Data
+```{r}
+ggplot(data, aes(x = x, y = y, color = x)) +
+  geom_point(alpha = .5, size = 5) +
+  labs(title = "Test Visualization",
+       x = "Predictor",
+       y = "Interview")
+```
+## Plot Residuals
+```{r}
+res <- resid(model)
+resframe <- tibble(x, res)
+ggplot(resframe, aes(x = x, y = res)) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0, color = "blue") +
+  labs(title = "Residuals",
+       x = "X",
+       y = "Y")
+```
+
+
+## Look at R^2
+```{r}
+lrm(y ~ x)
+```
+
